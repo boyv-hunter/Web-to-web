@@ -1,59 +1,43 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>Flask App</title>
+<head>
+    <title>Run Script</title>
     <style>
-      .button {
-        background-color: #4CAF50; /* Green */
-        color: white;
-        padding: 10px 20px;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-      }
-      .button:hover {
-        background-color: #3e8e41;
-      }
-      .button:disabled {
-        background-color: #ccc;
-        color: #666;
-      }
-    </style>
-  </head>
-  <body>
-    <h1>Welcome to my Flask App!</h1>
-    <button id="run-button" class="button" onclick="toggleScript()">Run Script</button>
-    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-    <script>
-      let scriptRunning = false;
-      
-      function toggleScript() {
-        if (scriptRunning) {
-          // Stop script
-          $.ajax({
-            type: "POST",
-            url: "/stop",
-            success: function() {
-              scriptRunning = false;
-              $("#run-button").text("Run Script");
-              $("#run-button").removeClass("running");
-              $("#run-button").addClass("stopped");
-            }
-          });
-        } else {
-          // Start script
-          $.ajax({
-            type: "POST",
-            url: "/run",
-            success: function() {
-              scriptRunning = true;
-              $("#run-button").text("Stop Script");
-              $("#run-button").removeClass("stopped");
-              $("#run-button").addClass("running");
-            }
-          });
+        #stop-button {
+            display: none;
         }
-      }
+    </style>
+</head>
+<body>
+    <h1>Run Script</h1>
+    <button id="run-button" onclick="runScript()">Run</button>
+    <button id="stop-button" onclick="stopScript()">Stop</button>
+    <div id="status"></div>
+
+    <script>
+        let scriptRunning = false;
+
+        function runScript() {
+            fetch('/run', { method: 'POST' })
+                .then(response => response.text())
+                .then(message => {
+                    document.getElementById('status').innerHTML = message;
+                    scriptRunning = true;
+                    document.getElementById('run-button').style.display = 'none';
+                    document.getElementById('stop-button').style.display = 'block';
+                });
+        }
+
+        function stopScript() {
+            fetch('/stop', { method: 'POST' })
+                .then(response => response.text())
+                .then(message => {
+                    document.getElementById('status').innerHTML = message;
+                    scriptRunning = false;
+                    document.getElementById('run-button').style.display = 'block';
+                    document.getElementById('stop-button').style.display = 'none';
+                });
+        }
     </script>
-  </body>
+</body>
 </html>
